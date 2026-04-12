@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pôle Accompagnement Scolaire</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:#1a73e8;--blue-dark:#1557b0;--blue-light:#e8f0fe;--blue-mid:#4285f4;
+  --green:#188038;--green-light:#e6f4ea;
+  --red:#c5221f;--red-light:#fce8e6;
+  --orange:#e37400;--orange-light:#fef7e0;
+  --gray-50:#f8f9fa;--gray-100:#f1f3f4;--gray-200:#e8eaed;--gray-300:#dadce0;
+  --gray-400:#bdc1c6;--gray-500:#9aa0a6;--gray-600:#80868b;--gray-700:#5f6368;
+  --gray-800:#3c4043;--gray-900:#202124;--white:#ffffff;
+  --shadow-sm:0 1px 2px rgba(60,64,67,.1),0 1px 3px rgba(60,64,67,.08);
+  --shadow-md:0 1px 3px rgba(60,64,67,.12),0 4px 12px rgba(60,64,67,.10);
+  --shadow-lg:0 4px 6px rgba(60,64,67,.1),0 12px 24px rgba(60,64,67,.12);
+  --radius:8px;--radius-lg:12px;--radius-xl:16px;
+  --font-sans:'DM Sans',system-ui,sans-serif;
+  --font-serif:'DM Serif Display',serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);color:var(--gray-900);background:var(--gray-50);font-size:14px;line-height:1.6;min-height:100vh}
+
+/* HEADER */
+.site-header{background:var(--white);border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:100}
+.header-inner{max-width:1100px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:20px;height:20px;fill:white}
+.logo-text h1{font-family:var(--font-serif);font-size:17px;font-weight:400;color:var(--gray-900);line-height:1.2}
+.logo-text p{font-size:11px;color:var(--gray-600);letter-spacing:.03em}
+.btn-admin-login{font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--blue);background:transparent;border:1px solid var(--blue);border-radius:6px;padding:7px 14px;cursor:pointer;transition:background .15s}
+.btn-admin-login:hover{background:var(--blue-light)}
+
+/* LAYOUT */
+.main{max-width:1100px;margin:0 auto;padding:32px 20px 60px}
+.view{display:none}.view.active{display:block}
+
+/* HERO */
+.hero{background:var(--white);border-radius:var(--radius-xl);border:1px solid var(--gray-200);padding:36px 40px 28px;margin-bottom:24px}
+.hero h2{font-family:var(--font-serif);font-size:26px;font-weight:400;color:var(--gray-900);margin-bottom:8px}
+.hero p{font-size:14px;color:var(--gray-700);max-width:560px;line-height:1.7;margin-bottom:18px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:5px 10px;border-radius:99px}
+.badge-blue{background:var(--blue-light);color:var(--blue-dark)}
+.badge-green{background:var(--green-light);color:var(--green)}
+.badge-orange{background:var(--orange-light);color:var(--orange)}
+
+/* LÉGENDE */
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray-700)}
+.legend-dot{width:12px;height:12px;border-radius:3px}
+.legend-dot.available{background:var(--green-light);border:1.5px solid #a8d5b5}
+.legend-dot.full{background:var(--gray-100);border:1.5px solid var(--gray-300)}
+.legend-dot.selected{background:var(--blue-light);border:1.5px solid var(--blue)}
+.legend-dot.pause{background:repeating-linear-gradient(45deg,var(--gray-200),var(--gray-200) 3px,var(--gray-50) 3px,var(--gray-50) 6px);border:1px solid var(--gray-300)}
+
+/* SECTION SEMAINE */
+.planning-section{margin-bottom:28px}
+.section-title{font-size:12px;font-weight:600;color:var(--gray-700);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--gray-200)}
+.week-block{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+.week-header{background:var(--gray-50);border-bottom:1px solid var(--gray-200);padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.week-label{font-size:13px;font-weight:600;color:var(--gray-800)}
+.week-dates{font-size:12px;color:var(--gray-600)}
+
+/* PLANNING TABLE */
+.planning-table-wrap{overflow-x:auto}
+.planning-table{width:100%;border-collapse:collapse;min-width:580px}
+.planning-table th{background:var(--gray-50);font-size:11px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:.05em;padding:9px 6px;text-align:center;border-bottom:1px solid var(--gray-200);border-right:1px solid var(--gray-200)}
+.planning-table th:last-child{border-right:none}
+.planning-table td{padding:4px 4px;border-bottom:1px solid var(--gray-200);border-right:1px solid var(--gray-200);text-align:center;vertical-align:middle}
+.planning-table td:last-child{border-right:none}
+.planning-table tr:last-child td{border-bottom:none}
+.time-col{font-size:11px;font-weight:600;color:var(--gray-700);background:var(--gray-50);padding:8px 10px;text-align:left!important;white-space:nowrap;min-width:100px}
+.period-header td{background:var(--gray-100)!important;padding:6px 10px!important}
+.period-label{font-size:11px;font-weight:600;color:var(--gray-700);letter-spacing:.04em;text-transform:uppercase;text-align:left!important}
+
+/* SLOT */
+.slot{border-radius:6px;padding:7px 4px;cursor:pointer;transition:all .15s;border:1.5px solid transparent;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.slot:focus{outline:2px solid var(--blue);outline-offset:2px}
+.slot.available{background:var(--green-light);border-color:#a8d5b5}
+.slot.available:hover{background:#c8e6d0;border-color:var(--green);transform:translateY(-1px);box-shadow:0 2px 8px rgba(24,128,56,.15)}
+.slot.full{background:var(--gray-100);border-color:var(--gray-300);cursor:not-allowed;opacity:.75}
+.slot.selected{background:var(--blue-light);border-color:var(--blue);box-shadow:0 2px 8px rgba(26,115,232,.2)}
+.slot.pause-cell{background:repeating-linear-gradient(45deg,var(--gray-100),var(--gray-100) 4px,var(--gray-50) 4px,var(--gray-50) 8px);border:1px dashed var(--gray-300);cursor:default;opacity:.8}
+.slot.absent{background:var(--gray-50);border:none;cursor:default}
+.slot-places{font-size:11px;font-weight:600}
+.slot.available .slot-places{color:var(--green)}
+.slot.full .slot-places{color:var(--gray-600)}
+.slot.selected .slot-places{color:var(--blue-dark)}
+.slot.pause-cell .slot-places{color:var(--gray-500);font-weight:400;font-size:10px}
+.slot-label{font-size:10px;color:var(--gray-600)}
+
+/* FORM */
+.form-panel{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden}
+.form-panel-header{padding:20px 24px 16px;border-bottom:1px solid var(--gray-200)}
+.form-panel-header h3{font-family:var(--font-serif);font-size:20px;font-weight:400;color:var(--gray-900)}
+.form-panel-header p{font-size:13px;color:var(--gray-600);margin-top:3px}
+.form-body{padding:24px}
+.selected-slot-info{background:var(--blue-light);border:1px solid #c5d8fb;border-radius:var(--radius);padding:12px 16px;margin-bottom:20px;font-size:13px;color:var(--blue-dark);display:flex;align-items:center;gap:8px}
+.no-slot-msg{background:var(--orange-light);border:1px solid #fdd38a;border-radius:var(--radius);padding:12px 16px;margin-bottom:20px;font-size:13px;color:var(--orange)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:12px;font-weight:600;color:var(--gray-700);letter-spacing:.03em}
+.form-group input,.form-group select{font-family:var(--font-sans);font-size:14px;color:var(--gray-900);background:var(--white);border:1px solid var(--gray-300);border-radius:var(--radius);padding:10px 12px;transition:border-color .15s,box-shadow .15s;appearance:none;-webkit-appearance:none}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.12)}
+.matieres-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px}
+.matiere-chip{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--gray-300);border-radius:6px;cursor:pointer;transition:all .15s;background:var(--white)}
+.matiere-chip:hover{border-color:var(--blue);background:var(--blue-light)}
+.matiere-chip input[type=checkbox]{width:14px;height:14px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
+.matiere-chip span{font-size:12px;color:var(--gray-800);line-height:1.3}
+.matiere-chip.checked{border-color:var(--blue);background:var(--blue-light)}
+.matiere-chip.checked span{color:var(--blue-dark);font-weight:500}
+.confirm-checks{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.confirm-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--gray-200);border-radius:var(--radius);background:var(--gray-50);cursor:pointer;transition:border-color .15s}
+.confirm-item:hover{border-color:var(--blue)}
+.confirm-item input[type=checkbox]{width:16px;height:16px;margin-top:1px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
+.confirm-item span{font-size:13px;color:var(--gray-800);line-height:1.5}
+.btn-submit{width:100%;font-family:var(--font-sans);font-size:14px;font-weight:600;color:var(--white);background:var(--blue);border:none;border-radius:var(--radius);padding:13px 24px;cursor:pointer;transition:background .15s,box-shadow .15s;margin-top:20px}
+.btn-submit:hover{background:var(--blue-dark);box-shadow:0 2px 8px rgba(26,115,232,.3)}
+.btn-submit:disabled{background:var(--gray-300);cursor:not-allowed;box-shadow:none}
+.alert{border-radius:var(--radius);padding:12px 16px;font-size:13px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
+.alert svg{flex-shrink:0;margin-top:1px}
+.alert-red{background:var(--red-light);color:var(--red);border:1px solid #f5c6c5}
+.alert-orange{background:var(--orange-light);color:var(--orange);border:1px solid #fdd38a}
+
+/* SUCCESS */
+.success-panel{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:48px 40px;text-align:center;box-shadow:var(--shadow-sm)}
+.success-icon{width:56px;height:56px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.success-panel h3{font-family:var(--font-serif);font-size:22px;font-weight:400;color:var(--gray-900);margin-bottom:10px}
+.success-panel p{font-size:14px;color:var(--gray-700);line-height:1.7;max-width:480px;margin:0 auto 8px}
+.success-recap{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px 20px;margin:20px auto;max-width:460px;text-align:left}
+.recap-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid var(--gray-200)}
+.recap-row:last-child{border-bottom:none}
+.recap-row span:first-child{color:var(--gray-600)}
+.recap-row span:last-child{font-weight:500;color:var(--gray-900);text-align:right;max-width:260px}
+.btn-new{font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-light);border:none;border-radius:6px;padding:9px 18px;cursor:pointer;margin-top:16px;transition:background .15s}
+.btn-new:hover{background:#d2e3fc}
+
+/* MODAL LOGIN */
+.modal-overlay{position:fixed;inset:0;background:rgba(32,33,36,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--white);border-radius:var(--radius-xl);padding:36px 32px 28px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);transform:translateY(8px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal h2{font-family:var(--font-serif);font-size:22px;font-weight:400;margin-bottom:6px}
+.modal p{font-size:13px;color:var(--gray-600);margin-bottom:24px}
+.modal-field{margin-bottom:14px}
+.modal-field label{display:block;font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:5px}
+.modal-field input{width:100%;font-family:var(--font-sans);font-size:14px;border:1px solid var(--gray-300);border-radius:var(--radius);padding:10px 12px}
+.modal-field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.12)}
+.modal-error{font-size:12px;color:var(--red);margin-top:-8px;margin-bottom:10px;display:none}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.btn-cancel{font-family:var(--font-sans);font-size:13px;color:var(--gray-700);background:transparent;border:1px solid var(--gray-300);border-radius:6px;padding:8px 16px;cursor:pointer}
+.btn-confirm{font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--white);background:var(--blue);border:none;border-radius:6px;padding:8px 16px;cursor:pointer}
+.btn-confirm:hover{background:var(--blue-dark)}
+
+/* MODAL CRÉNEAU COMPLET */
+.full-modal-overlay{position:fixed;inset:0;background:rgba(32,33,36,.45);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.full-modal-overlay.open{opacity:1;pointer-events:all}
+.full-modal{background:var(--white);border-radius:var(--radius-xl);padding:28px 28px 22px;width:100%;max-width:420px;box-shadow:var(--shadow-lg)}
+.full-modal h3{font-family:var(--font-serif);font-size:18px;font-weight:400;margin-bottom:10px;color:var(--gray-900)}
+.full-modal p{font-size:13px;color:var(--gray-700);line-height:1.7;margin-bottom:16px}
+.full-modal button{font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--white);background:var(--blue);border:none;border-radius:6px;padding:9px 18px;cursor:pointer}
+
+/* ADMIN */
+.admin-bar{background:var(--blue);color:var(--white);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;font-size:13px;border-radius:var(--radius) var(--radius) 0 0}
+.admin-bar strong{font-weight:600}
+.btn-logout{font-family:var(--font-sans);font-size:12px;color:var(--white);background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:5px;padding:4px 10px;cursor:pointer}
+.btn-logout:hover{background:rgba(255,255,255,.25)}
+.admin-tabs{display:flex;gap:2px;border-bottom:1px solid var(--gray-200);background:var(--white);padding:0 20px;overflow-x:auto}
+.admin-tab{font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--gray-700);background:transparent;border:none;border-bottom:2px solid transparent;padding:12px 16px;cursor:pointer;transition:color .15s;margin-bottom:-1px;white-space:nowrap}
+.admin-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.admin-tab:hover:not(.active){color:var(--gray-900)}
+.admin-content{background:var(--white);border:1px solid var(--gray-200);border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);padding:24px}
+.admin-tab-content{display:none}.admin-tab-content.active{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px}
+.stat-card .stat-num{font-size:28px;font-weight:300;color:var(--blue);font-family:var(--font-serif)}
+.stat-card .stat-label{font-size:12px;color:var(--gray-600);margin-top:2px}
+.table-wrap{overflow-x:auto;border:1px solid var(--gray-200);border-radius:var(--radius)}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;min-width:750px}
+.data-table th{background:var(--gray-50);font-size:11px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:.05em;padding:10px 14px;text-align:left;border-bottom:1px solid var(--gray-200);white-space:nowrap}
+.data-table td{padding:11px 14px;border-bottom:1px solid var(--gray-200);color:var(--gray-800);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--gray-50)}
+.status-badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px}
+.status-confirmed{background:var(--green-light);color:var(--green)}
+.status-cancelled{background:var(--red-light);color:var(--red)}
+.btn-cancel-reg{font-size:11px;color:var(--red);background:transparent;border:1px solid #f5c6c5;border-radius:4px;padding:3px 8px;cursor:pointer}
+.btn-cancel-reg:hover{background:var(--red-light)}
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.config-group{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px}
+.config-group label{display:block;font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:8px}
+.config-group input[type=number]{width:90px;font-family:var(--font-sans);font-size:16px;font-weight:500;border:1px solid var(--gray-300);border-radius:6px;padding:7px 10px;text-align:center}
+.config-group input[type=number]:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.12)}
+.config-group p{font-size:12px;color:var(--gray-600);margin-top:6px}
+.btn-save-config{font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--white);background:var(--blue);border:none;border-radius:6px;padding:9px 18px;cursor:pointer;margin-top:16px}
+.btn-save-config:hover{background:var(--blue-dark)}
+.admin-planning-grid{display:grid;gap:7px}
+.admin-slot-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--radius);background:var(--gray-50)}
+.admin-slot-row.pause-row{background:repeating-linear-gradient(45deg,var(--gray-100),var(--gray-100) 4px,var(--gray-50) 4px,var(--gray-50) 8px);opacity:.7}
+.admin-slot-info{font-size:13px;color:var(--gray-800)}
+.admin-slot-count{font-size:12px;color:var(--gray-600);margin-top:2px}
+.slot-max-input{width:52px;font-family:var(--font-sans);font-size:13px;border:1px solid var(--gray-300);border-radius:5px;padding:3px 6px;text-align:center}
+.qr-section{text-align:center;padding:20px 0}
+.qr-section p{font-size:13px;color:var(--gray-600);margin-bottom:16px}
+.qr-input-row{display:flex;gap:8px;max-width:500px;margin:0 auto 20px}
+.qr-input-row input{flex:1;font-family:var(--font-sans);font-size:13px;border:1px solid var(--gray-300);border-radius:6px;padding:9px 12px}
+.qr-input-row input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.12)}
+.btn-gen-qr{font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--white);background:var(--blue);border:none;border-radius:6px;padding:9px 16px;cursor:pointer;white-space:nowrap}
+.btn-dl-qr{font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-light);border:none;border-radius:6px;padding:9px 18px;cursor:pointer;margin-top:12px;display:none}
+.btn-dl-qr:hover{background:#d2e3fc}
+.export-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn-export{font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-light);border:none;border-radius:6px;padding:9px 16px;cursor:pointer}
+.btn-export:hover{background:#d2e3fc}
+.config-saved-msg{display:none;margin-top:12px;font-size:13px;font-weight:500;color:var(--green)}
+
+@media(max-width:640px){
+  .main{padding:16px 12px 40px}
+  .hero{padding:24px 20px 20px}
+  .hero h2{font-size:20px}
+  .form-grid{grid-template-columns:1fr}
+  .config-grid{grid-template-columns:1fr}
+  .header-inner{height:56px}
+  .logo-text p{display:none}
+  .matieres-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+      </div>
+      <div class="logo-text">
+        <h1>Pôle Accompagnement Scolaire</h1>
+        <p>Système d'inscription en ligne</p>
+      </div>
+    </div>
+    <button class="btn-admin-login" onclick="openLoginModal()">Administration</button>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- VUE ÉLÈVE -->
+  <div id="view-student" class="view active">
+    <div class="hero">
+      <h2>Inscris-toi à une séance d'accompagnement</h2>
+      <p>Sélectionne un créneau dans le planning, complète le formulaire et tu recevras une confirmation par email avec un lien pour annuler si nécessaire.</p>
+      <div class="hero-meta">
+        <span class="badge badge-blue">Sessions 8 – 19 juin 2025</span>
+        <span class="badge badge-green">Places disponibles</span>
+        <span class="badge badge-orange">Max 3 séances / semaine</span>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot available"></span>Disponible</div>
+      <div class="legend-item"><span class="legend-dot full"></span>Complet</div>
+      <div class="legend-item"><span class="legend-dot selected"></span>Sélectionné</div>
+      <div class="legend-item"><span class="legend-dot pause"></span>Pause</div>
+    </div>
+
+    <div class="planning-section">
+      <div class="section-title">Semaine 1</div>
+      <div class="week-block">
+        <div class="week-header">
+          <span class="week-label">Semaine 1</span>
+          <span class="week-dates">Lundi 8 – Vendredi 12 juin 2025</span>
+        </div>
+        <div class="planning-table-wrap">
+          <table class="planning-table" id="table-w1"></table>
+        </div>
+      </div>
+      <div class="section-title">Semaine 2</div>
+      <div class="week-block">
+        <div class="week-header">
+          <span class="week-label">Semaine 2</span>
+          <span class="week-dates">Lundi 15 – Vendredi 19 juin 2025</span>
+        </div>
+        <div class="planning-table-wrap">
+          <table class="planning-table" id="table-w2"></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-panel" id="form-panel">
+      <div class="form-panel-header">
+        <h3>Formulaire d'inscription</h3>
+        <p>Tous les champs sont obligatoires</p>
+      </div>
+      <div class="form-body">
+        <div id="slot-info-box" class="no-slot-msg">← Sélectionne d'abord un créneau dans le planning ci-dessus.</div>
+        <div id="form-alerts"></div>
+        <form id="inscription-form" novalidate>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="f-nom">Nom &amp; Prénom *</label>
+              <input type="text" id="f-nom" placeholder="Ex : Martin Sophie" required>
+            </div>
+            <div class="form-group">
+              <label for="f-classe">Classe *</label>
+              <input type="text" id="f-classe" placeholder="Ex : 4P Hôtellerie" required>
+            </div>
+            <div class="form-group full">
+              <label for="f-email">Adresse email *</label>
+              <input type="email" id="f-email" placeholder="ton.email@exemple.com" required>
+            </div>
+            <div class="form-group full">
+              <label>Matière(s) souhaitée(s) * <span style="font-weight:400;color:var(--gray-600)">(une ou plusieurs)</span></label>
+              <div class="matieres-grid" id="matieres-container"></div>
+            </div>
+          </div>
+          <div style="margin-top:20px">
+            <label style="font-size:12px;font-weight:600;color:var(--gray-700);display:block;margin-bottom:8px">Engagements *</label>
+            <div class="confirm-checks">
+              <label class="confirm-item">
+                <input type="checkbox" id="chk1">
+                <span>Je viendrai avec mes cours complétés et mes exercices préparés.</span>
+              </label>
+              <label class="confirm-item">
+                <input type="checkbox" id="chk2">
+                <span>Mes notes et leçons seront à jour pour la séance.</span>
+              </label>
+            </div>
+          </div>
+          <button type="submit" class="btn-submit">Confirmer mon inscription</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- VUE SUCCÈS -->
+  <div id="view-success" class="view">
+    <div class="success-panel">
+      <div class="success-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#188038" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3>Inscription confirmée !</h3>
+      <p>Un email de confirmation a été envoyé à <strong id="success-email"></strong>. Il contient un lien pour annuler ta séance si nécessaire.</p>
+      <div class="success-recap" id="success-recap"></div>
+      <p style="font-size:13px;color:var(--gray-600);margin-top:10px">Un rappel automatique te sera envoyé 48h avant ta séance. N'oublie pas d'apporter tes cours et notes à jour !</p>
+      <button class="btn-new" onclick="resetToStudent()">Faire une nouvelle inscription</button>
+    </div>
+  </div>
+
+  <!-- VUE ADMIN -->
+  <div id="view-admin" class="view">
+    <div class="admin-bar">
+      <span>🔒 <strong>Mode Administration</strong> — Pôle Accompagnement Scolaire</span>
+      <button class="btn-logout" onclick="logout()">Déconnexion</button>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchTab('tab-inscriptions',this)">Inscriptions</button>
+      <button class="admin-tab" onclick="switchTab('tab-planning',this)">Planning</button>
+      <button class="admin-tab" onclick="switchTab('tab-config',this)">Paramètres</button>
+      <button class="admin-tab" onclick="switchTab('tab-qr',this)">QR Code</button>
+    </div>
+    <div class="admin-content">
+      <div id="tab-inscriptions" class="admin-tab-content active">
+        <div class="stats-grid" id="admin-stats"></div>
+        <div class="export-row">
+          <button class="btn-export" onclick="exportCSV()">⬇ Exporter CSV</button>
+          <button class="btn-export" onclick="sendAllReminders()">📧 Envoyer tous les rappels</button>
+        </div>
+        <div style="margin-top:16px" class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>Nom &amp; Prénom</th><th>Classe</th><th>Matière(s)</th>
+              <th>Date</th><th>Créneau</th><th>Email</th><th>Statut</th><th>Action</th>
+            </tr></thead>
+            <tbody id="admin-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="tab-planning" class="admin-tab-content">
+        <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px">Modifie le nombre de places par créneau. Appliqué immédiatement.</p>
+        <div class="admin-planning-grid" id="admin-planning-grid"></div>
+        <button class="btn-save-config" onclick="savePlanningConfig()">Enregistrer</button>
+        <div class="config-saved-msg" id="msg-planning">✓ Modifications enregistrées.</div>
+      </div>
+      <div id="tab-config" class="admin-tab-content">
+        <div class="config-grid">
+          <div class="config-group">
+            <label>Places max par créneau (défaut)</label>
+            <input type="number" id="cfg-places" min="1" max="99" value="9">
+            <p>Valeur appliquée par défaut à tous les créneaux non modifiés individuellement.</p>
+          </div>
+          <div class="config-group">
+            <label>Max séances par élève / semaine</label>
+            <input type="number" id="cfg-maxweek" min="1" max="10" value="3">
+            <p>Vérification par adresse email. Modifiable une fois les données agents reçues.</p>
+          </div>
+        </div>
+        <button class="btn-save-config" onclick="saveConfig()">Enregistrer la configuration</button>
+        <div class="config-saved-msg" id="msg-config">✓ Configuration enregistrée.</div>
+      </div>
+      <div id="tab-qr" class="admin-tab-content">
+        <div class="qr-section">
+          <p>Génère un QR code à partir de l'URL publique du site pour l'intégrer dans une affiche.</p>
+          <div class="qr-input-row">
+            <input type="url" id="qr-url" placeholder="https://mon-site.vercel.app">
+            <button class="btn-gen-qr" onclick="generateQR()">Générer</button>
+          </div>
+          <div id="qr-output"></div>
+          <button class="btn-dl-qr" id="btn-dl-qr" onclick="downloadQR()">⬇ Télécharger PNG haute résolution</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL LOGIN -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal">
+    <h2>Administration</h2>
+    <p>Accès réservé au personnel encadrant.</p>
+    <div class="modal-field">
+      <label>Identifiant</label>
+      <input type="text" id="login-user" autocomplete="username">
+    </div>
+    <div class="modal-field">
+      <label>Mot de passe</label>
+      <input type="password" id="login-pass" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="modal-error" id="login-error">Identifiant ou mot de passe incorrect.</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeLoginModal()">Annuler</button>
+      <button class="btn-confirm" onclick="doLogin()">Se connecter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CRÉNEAU COMPLET -->
+<div class="full-modal-overlay" id="full-modal">
+  <div class="full-modal">
+    <h3>Créneau complet</h3>
+    <p>Plus de disponibilités pour cette tranche horaire. Veuillez choisir une autre tranche horaire dans le planning.</p>
+    <button onclick="document.getElementById('full-modal').classList.remove('open')">Compris</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════
+//  STRUCTURE DES CRÉNEAUX
+// ═══════════════════════════════════════════════
+
+// Créneaux matin : 5 slots + 1 pause visible
+const SLOTS_AM = [
+  { key:'AM1', label:'8h15 – 9h05',   isPause:false },
+  { key:'AM2', label:'9h05 – 9h55',   isPause:false },
+  { key:'AM3', label:'9h55 – 10h45',  isPause:false },
+  { key:'PAU', label:'Pause',         isPause:true  },
+  { key:'AM4', label:'11h00 – 11h50', isPause:false },
+  { key:'AM5', label:'11h50 – 12h40', isPause:false },
+];
+
+// Créneaux après-midi : 3 slots
+const SLOTS_PM = [
+  { key:'PM1', label:'13h30 – 14h20', isPause:false },
+  { key:'PM2', label:'14h20 – 15h10', isPause:false },
+  { key:'PM3', label:'15h10 – 16h00', isPause:false },
+];
+
+const DAYS_W1 = [
+  { label:'Lun 8/06',  full:'Lundi 8 juin',     hasPM:true  },
+  { label:'Mar 9/06',  full:'Mardi 9 juin',      hasPM:true  },
+  { label:'Mer 10/06', full:'Mercredi 10 juin',  hasPM:false },
+  { label:'Jeu 11/06', full:'Jeudi 11 juin',     hasPM:true  },
+  { label:'Ven 12/06', full:'Vendredi 12 juin',  hasPM:true  },
+];
+const DAYS_W2 = [
+  { label:'Lun 15/06', full:'Lundi 15 juin',     hasPM:true  },
+  { label:'Mar 16/06', full:'Mardi 16 juin',      hasPM:true  },
+  { label:'Mer 17/06', full:'Mercredi 17 juin',  hasPM:false },
+  { label:'Jeu 18/06', full:'Jeudi 18 juin',     hasPM:true  },
+  { label:'Ven 19/06', full:'Vendredi 19 juin',  hasPM:true  },
+];
+
+const MATIERES = [
+  'Français','Maths','Sciences','Histoire','Géographie','EES','Gestion',
+  'Secrétariat bureautique','Anglais','Néerlandais','Espagnol','Allemand',
+  'CT cuisine','CT Hygiène','CT Métier','CT Salle',
+  'Pratique boucherie','Pratique chocolaterie','Pratique boulangerie',
+  'Pratique pâtisserie','Pratique salle','Pratique cuisine','Pratique traiteur','CPC'
+];
+
+// ═══════════════════════════════════════════════
+//  DONNÉES PLANNING
+// ═══════════════════════════════════════════════
+let config = { defaultPlaces:9, maxPerWeek:3 };
+
+// Génère les clés pour chaque jour/créneau réel (hors pause)
+function makeSlotKey(weekKey, dayIdx, slotKey) {
+  return `${weekKey}_${dayIdx}_${slotKey}`;
+}
+
+// Initialise slotData pour une semaine
+function initWeek(days, weekKey) {
+  let data = {};
+  days.forEach((d, di) => {
+    SLOTS_AM.forEach(s => {
+      if (s.isPause) return;
+      const k = makeSlotKey(weekKey, di, s.key);
+      data[k] = { places:config.defaultPlaces, used:Math.floor(Math.random()*4), day:d.full, label:s.label };
+    });
+    if (d.hasPM) {
+      SLOTS_PM.forEach(s => {
+        const k = makeSlotKey(weekKey, di, s.key);
+        data[k] = { places:config.defaultPlaces, used:Math.floor(Math.random()*5), day:d.full, label:s.label };
+      });
+    }
+  });
+  return data;
+}
+
+let slotData = { ...initWeek(DAYS_W1,'W1'), ...initWeek(DAYS_W2,'W2') };
+// Forcer 1 créneau complet pour la démo
+const demoFullKey = Object.keys(slotData)[3];
+slotData[demoFullKey].used = slotData[demoFullKey].places;
+
+let inscriptions = [
+  { id:1, nom:'Dupont Alexis', classe:'4P Hôtellerie', matieres:'Pratique cuisine', date:'Lundi 8 juin', creneau:'8h15 – 9h05', email:'alexis.dupont@exemple.com', statut:'confirmé', token:'abc-001' },
+  { id:2, nom:'Martin Léa',    classe:'3e secondaire', matieres:'Maths, Français',  date:'Mardi 9 juin', creneau:'11h00 – 11h50', email:'lea.martin@exemple.com', statut:'confirmé', token:'abc-002' },
+  { id:3, nom:'Nguyen Thanh',  classe:'4e Gestion',    matieres:'Gestion, EES',     date:'Jeudi 11 juin', creneau:'13h30 – 14h20', email:'thanh.nguyen@exemple.com', statut:'annulé', token:'abc-003' },
+];
+
+let selectedSlot = null;
+let selectedMeta = null;
+let isAdmin = false;
+
+// ═══════════════════════════════════════════════
+//  RENDU DES TABLES DE PLANNING
+// ═══════════════════════════════════════════════
+function buildTable(tableId, days, weekKey) {
+  const tbl = document.getElementById(tableId);
+
+  // ── THEAD ──
+  let h = '<thead><tr><th style="min-width:104px">Créneau</th>';
+  days.forEach(d => h += `<th>${d.label}</th>`);
+  h += '</tr></thead>';
+
+  // ── TBODY ──
+  let b = '<tbody>';
+
+  // --- Ligne séparateur MATIN ---
+  b += `<tr class="period-header"><td class="period-label time-col" colspan="${days.length+1}">🌅 Matin</td></tr>`;
+
+  SLOTS_AM.forEach(slot => {
+    b += '<tr>';
+    if (slot.isPause) {
+      // Ligne pause : étiquette + cases hachurées sur toutes les colonnes
+      b += `<td class="time-col" style="color:var(--gray-500);font-style:italic">Pause (15 min)</td>`;
+      days.forEach(() => {
+        b += `<td><div class="slot pause-cell"><span class="slot-places">10h45 – 11h00</span></div></td>`;
+      });
+    } else {
+      b += `<td class="time-col">${slot.label}</td>`;
+      days.forEach((d, di) => {
+        const k = makeSlotKey(weekKey, di, slot.key);
+        const s = slotData[k];
+        const rem = s.places - s.used;
+        const isFull = rem <= 0;
+        const isSel = selectedSlot === k;
+        const cls = isFull ? 'full' : isSel ? 'selected' : 'available';
+        b += `<td><div class="slot ${cls}" tabindex="0"
+          onclick="selectSlot('${k}','${d.full}','${slot.label}',${isFull})"
+          onkeydown="if(event.key==='Enter')selectSlot('${k}','${d.full}','${slot.label}',${isFull})">`;
+        if (isFull) {
+          b += `<span class="slot-places">Complet</span>`;
+        } else {
+          b += `<span class="slot-places">${rem} place${rem>1?'s':''}</span><span class="slot-label">dispo${rem>1?'nibles':'nible'}</span>`;
+        }
+        b += `</div></td>`;
+      });
+    }
+    b += '</tr>';
+  });
+
+  // --- Ligne séparateur APRÈS-MIDI ---
+  b += `<tr class="period-header"><td class="period-label time-col" colspan="${days.length+1}">☀️ Après-midi</td></tr>`;
+
+  SLOTS_PM.forEach(slot => {
+    b += '<tr>';
+    b += `<td class="time-col">${slot.label}</td>`;
+    days.forEach((d, di) => {
+      if (!d.hasPM) {
+        b += `<td><div class="slot absent"><span style="color:var(--gray-400);font-size:10px">—</span></div></td>`;
+        return;
+      }
+      const k = makeSlotKey(weekKey, di, slot.key);
+      const s = slotData[k];
+      const rem = s.places - s.used;
+      const isFull = rem <= 0;
+      const isSel = selectedSlot === k;
+      const cls = isFull ? 'full' : isSel ? 'selected' : 'available';
+      b += `<td><div class="slot ${cls}" tabindex="0"
+        onclick="selectSlot('${k}','${d.full}','${slot.label}',${isFull})"
+        onkeydown="if(event.key==='Enter')selectSlot('${k}','${d.full}','${slot.label}',${isFull})">`;
+      if (isFull) {
+        b += `<span class="slot-places">Complet</span>`;
+      } else {
+        b += `<span class="slot-places">${rem} place${rem>1?'s':''}</span><span class="slot-label">dispo${rem>1?'nibles':'nible'}</span>`;
+      }
+      b += `</div></td>`;
+    });
+    b += '</tr>';
+  });
+
+  b += '</tbody>';
+  tbl.innerHTML = h + b;
+}
+
+function renderAllTables() {
+  buildTable('table-w1', DAYS_W1, 'W1');
+  buildTable('table-w2', DAYS_W2, 'W2');
+}
+
+// ═══════════════════════════════════════════════
+//  SÉLECTION CRÉNEAU
+// ═══════════════════════════════════════════════
+function selectSlot(key, dayFull, timeLabel, isFull) {
+  if (isFull) {
+    document.getElementById('full-modal').classList.add('open');
+    return;
+  }
+  selectedSlot = key;
+  selectedMeta = { key, dayFull, timeLabel, week: key.startsWith('W1') ? 'W1' : 'W2' };
+  renderAllTables();
+  const box = document.getElementById('slot-info-box');
+  box.className = 'selected-slot-info';
+  box.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>&nbsp;<strong>${dayFull}</strong> — ${timeLabel}`;
+  document.getElementById('form-panel').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ═══════════════════════════════════════════════
+//  MATIÈRES
+// ═══════════════════════════════════════════════
+function buildMatieres() {
+  document.getElementById('matieres-container').innerHTML = MATIERES.map(m => {
+    const id = 'chip-' + m.replace(/[\s\/]/g,'_');
+    return `<label class="matiere-chip" id="${id}"><input type="checkbox" value="${m}" onchange="toggleChip(this,'${id}')"><span>${m}</span></label>`;
+  }).join('');
+}
+function toggleChip(cb, id) {
+  document.getElementById(id).classList.toggle('checked', cb.checked);
+}
+function getSelectedMatieres() {
+  return Array.from(document.querySelectorAll('#matieres-container input:checked')).map(i => i.value);
+}
+
+// ═══════════════════════════════════════════════
+//  SOUMISSION FORMULAIRE
+// ═══════════════════════════════════════════════
+document.getElementById('inscription-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const alerts = document.getElementById('form-alerts');
+  alerts.innerHTML = '';
+
+  const nom    = document.getElementById('f-nom').value.trim();
+  const classe = document.getElementById('f-classe').value.trim();
+  const email  = document.getElementById('f-email').value.trim();
+  const mats   = getSelectedMatieres();
+  const c1     = document.getElementById('chk1').checked;
+  const c2     = document.getElementById('chk2').checked;
+
+  const errIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+  const warnIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+
+  if (!selectedSlot)
+    return alerts.innerHTML = `<div class="alert alert-red">${errIcon} Sélectionne d'abord un créneau dans le planning.</div>`;
+  if (!nom || !classe || !email)
+    return alerts.innerHTML = `<div class="alert alert-red">${errIcon} Merci de remplir tous les champs obligatoires.</div>`;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return alerts.innerHTML = `<div class="alert alert-red">${errIcon} L'adresse email ne semble pas valide.</div>`;
+  if (mats.length === 0)
+    return alerts.innerHTML = `<div class="alert alert-red">${errIcon} Sélectionne au moins une matière.</div>`;
+  if (!c1 || !c2)
+    return alerts.innerHTML = `<div class="alert alert-orange">${warnIcon} Tu dois confirmer les deux engagements pour valider ton inscription.</div>`;
+
+  // Vérification limite hebdomadaire (localStorage)
+  const lsKey = `pas_${email}_${selectedMeta.week}`;
+  const already = parseInt(localStorage.getItem(lsKey) || '0');
+  if (already >= config.maxPerWeek)
+    return alerts.innerHTML = `<div class="alert alert-red">${errIcon} Tu as atteint le maximum d'inscriptions pour cette semaine. Maximum ${config.maxPerWeek} séance${config.maxPerWeek>1?'s':''} par semaine par élève.</div>`;
+
+  // Enregistrement
+  slotData[selectedSlot].used++;
+  localStorage.setItem(lsKey, already + 1);
+  const newReg = {
+    id: inscriptions.length + 1,
+    nom, classe,
+    matieres: mats.join(', '),
+    date: selectedMeta.dayFull,
+    creneau: selectedMeta.timeLabel,
+    email, statut:'confirmé',
+    token: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2)
+  };
+  inscriptions.push(newReg);
+
+  document.getElementById('success-email').textContent = email;
+  document.getElementById('success-recap').innerHTML = [
+    ['Nom & Prénom', nom],
+    ['Classe',       classe],
+    ['Matière(s)',   mats.join(', ')],
+    ['Date',         selectedMeta.dayFull],
+    ['Créneau',      selectedMeta.timeLabel],
+  ].map(([l,v]) => `<div class="recap-row"><span>${l}</span><span>${v}</span></div>`).join('');
+
+  showView('view-success');
+});
+
+// ═══════════════════════════════════════════════
+//  VUES
+// ═══════════════════════════════════════════════
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function resetToStudent() {
+  selectedSlot = null; selectedMeta = null;
+  document.getElementById('inscription-form').reset();
+  document.querySelectorAll('.matiere-chip').forEach(c => c.classList.remove('checked'));
+  document.getElementById('slot-info-box').className = 'no-slot-msg';
+  document.getElementById('slot-info-box').textContent = '← Sélectionne d\'abord un créneau dans le planning ci-dessus.';
+  document.getElementById('form-alerts').innerHTML = '';
+  renderAllTables();
+  showView('view-student');
+}
+
+// ═══════════════════════════════════════════════
+//  LOGIN / ADMIN
+// ═══════════════════════════════════════════════
+const ADMIN_USER = 'admin', ADMIN_PASS = 'admin2526';
+
+function openLoginModal() { document.getElementById('login-modal').classList.add('open'); setTimeout(() => document.getElementById('login-user').focus(), 80); }
+function closeLoginModal() { document.getElementById('login-modal').classList.remove('open'); document.getElementById('login-error').style.display='none'; }
+function doLogin() {
+  if (document.getElementById('login-user').value === ADMIN_USER &&
+      document.getElementById('login-pass').value === ADMIN_PASS) {
+    isAdmin = true; closeLoginModal(); renderAdminView(); showView('view-admin');
+  } else { document.getElementById('login-error').style.display='block'; }
+}
+function logout() { isAdmin = false; resetToStudent(); }
+
+// ═══════════════════════════════════════════════
+//  ADMIN — RENDER
+// ═══════════════════════════════════════════════
+function renderAdminView() { renderStats(); renderAdminTable(); renderAdminPlanning(); }
+
+function renderStats() {
+  const confirmed  = inscriptions.filter(i => i.statut==='confirmé').length;
+  const cancelled  = inscriptions.filter(i => i.statut==='annulé').length;
+  let totalP=0, usedP=0;
+  Object.values(slotData).forEach(s => { totalP+=s.places; usedP+=s.used; });
+  document.getElementById('admin-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${confirmed}</div><div class="stat-label">Inscriptions confirmées</div></div>
+    <div class="stat-card"><div class="stat-num">${cancelled}</div><div class="stat-label">Annulations</div></div>
+    <div class="stat-card"><div class="stat-num">${totalP-usedP}</div><div class="stat-label">Places disponibles</div></div>
+    <div class="stat-card"><div class="stat-num">${inscriptions.length}</div><div class="stat-label">Total traitées</div></div>`;
+}
+
+function renderAdminTable() {
+  document.getElementById('admin-tbody').innerHTML = inscriptions.map(i => `
+    <tr>
+      <td>${i.nom}</td><td>${i.classe}</td><td>${i.matieres}</td>
+      <td>${i.date}</td><td>${i.creneau}</td><td>${i.email}</td>
+      <td><span class="status-badge ${i.statut==='confirmé'?'status-confirmed':'status-cancelled'}">${i.statut}</span></td>
+      <td>${i.statut==='confirmé'?`<button class="btn-cancel-reg" onclick="cancelReg(${i.id})">Annuler</button>`:'—'}</td>
+    </tr>`).join('');
+}
+
+function cancelReg(id) {
+  const r = inscriptions.find(i => i.id===id);
+  if (!r || r.statut==='annulé') return;
+  if (!confirm(`Annuler l'inscription de ${r.nom} ?`)) return;
+  r.statut = 'annulé';
+  // Retrouver la clé du créneau pour libérer la place
+  const key = Object.keys(slotData).find(k => {
+    const s = slotData[k];
+    return s.day === r.date && s.label === r.creneau;
+  });
+  if (key) slotData[key].used = Math.max(0, slotData[key].used - 1);
+  renderAdminView(); renderAllTables();
+}
+
+function renderAdminPlanning() {
+  document.getElementById('admin-planning-grid').innerHTML = Object.entries(slotData).map(([key, s]) =>
+    `<div class="admin-slot-row">
+      <div>
+        <div class="admin-slot-info">${s.day} — ${s.label}</div>
+        <div class="admin-slot-count">${s.used} inscrits / <input type="number" class="slot-max-input" id="max-${key}" min="1" max="99" value="${s.places}"> places max</div>
+      </div>
+      <span class="badge ${s.used>=s.places?'badge-orange':'badge-green'}">${s.used>=s.places?'Complet':`${s.places-s.used} libre${s.places-s.used>1?'s':''}`}</span>
+    </div>`
+  ).join('');
+}
+
+function savePlanningConfig() {
+  Object.keys(slotData).forEach(k => {
+    const inp = document.getElementById(`max-${k}`);
+    if (inp) slotData[k].places = Math.max(1, parseInt(inp.value)||slotData[k].places);
+  });
+  renderAdminView(); renderAllTables();
+  const m = document.getElementById('msg-planning');
+  m.style.display='block'; setTimeout(() => m.style.display='none', 2500);
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function saveConfig() {
+  const p = parseInt(document.getElementById('cfg-places').value);
+  const m = parseInt(document.getElementById('cfg-maxweek').value);
+  if (p>0) config.defaultPlaces=p;
+  if (m>0) config.maxPerWeek=m;
+  const msg = document.getElementById('msg-config');
+  msg.style.display='block'; setTimeout(()=>msg.style.display='none', 2500);
+}
+
+function exportCSV() {
+  const header = 'Nom & Prénom,Classe,Matière(s),Date,Créneau,Email,Statut\n';
+  const rows = inscriptions.map(i =>
+    `"${i.nom}","${i.classe}","${i.matieres}","${i.date}","${i.creneau}","${i.email}","${i.statut}"`
+  ).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+header+rows], {type:'text/csv;charset=utf-8;'}));
+  a.download = 'inscriptions_pas.csv';
+  a.click();
+}
+
+function sendAllReminders() {
+  alert(`${inscriptions.filter(i=>i.statut==='confirmé').length} rappel(s) envoyés via Apps Script une fois le backend connecté.`);
+}
+
+// ═══════════════════════════════════════════════
+//  QR CODE
+// ═══════════════════════════════════════════════
+function generateQR() {
+  const url = document.getElementById('qr-url').value.trim();
+  if (!url) return alert('Saisis d\'abord l\'URL du site.');
+  const out = document.getElementById('qr-output');
+  out.innerHTML = '';
+  const cv = document.createElement('canvas');
+  out.appendChild(cv);
+  QRCode.toCanvas(cv, url, { width:240, margin:2, color:{dark:'#202124',light:'#ffffff'} }, err => {
+    if (!err) document.getElementById('btn-dl-qr').style.display='inline-block';
+  });
+}
+
+function downloadQR() {
+  const src = document.querySelector('#qr-output canvas');
+  if (!src) return;
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 600;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,600,600);
+  ctx.drawImage(src,0,0,600,600);
+  const a = document.createElement('a');
+  a.download='qrcode_pas.png'; a.href=cv.toDataURL('image/png'); a.click();
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+buildMatieres();
+renderAllTables();
+</script>
+</body>
+</html>
