@@ -664,7 +664,7 @@ function getSelectedMatieres() {
 // ═══════════════════════════════════════════════
 //  SOUMISSION FORMULAIRE
 // ═══════════════════════════════════════════════
-document.getElementById('inscription-form').addEventListener('submit', function(e) {
+document.getElementById('inscription-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   const alerts = document.getElementById('form-alerts');
   alerts.innerHTML = '';
@@ -690,36 +690,54 @@ document.getElementById('inscription-form').addEventListener('submit', function(
   if (!c1 || !c2)
     return alerts.innerHTML = `<div class="alert alert-orange">${warnIcon} Tu dois confirmer les deux engagements pour valider ton inscription.</div>`;
 
-  // Vérification limite hebdomadaire (localStorage)
+  // Vérification limite hebdomadaire (localStorage — double sécurité côté client)
   const lsKey = `pas_${email}_${selectedMeta.week}`;
   const already = parseInt(localStorage.getItem(lsKey) || '0');
   if (already >= config.maxPerWeek)
     return alerts.innerHTML = `<div class="alert alert-red">${errIcon} Tu as atteint le maximum d'inscriptions pour cette semaine. Maximum ${config.maxPerWeek} séance${config.maxPerWeek>1?'s':''} par semaine par élève.</div>`;
 
-  // Enregistrement
-  slotData[selectedSlot].used++;
-  localStorage.setItem(lsKey, already + 1);
-  const newReg = {
-    id: inscriptions.length + 1,
-    nom, classe,
-    matieres: mats.join(', '),
-    date: selectedMeta.dayFull,
-    creneau: selectedMeta.timeLabel,
-    email, statut:'confirmé',
-    token: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2)
-  };
-  inscriptions.push(newReg);
+  // Désactiver le bouton pendant l'envoi
+  const btnSubmit = document.querySelector('.btn-submit');
+  btnSubmit.disabled = true;
+  btnSubmit.textContent = 'Envoi en cours…';
 
-  document.getElementById('success-email').textContent = email;
-  document.getElementById('success-recap').innerHTML = [
-    ['Nom & Prénom', nom],
-    ['Classe',       classe],
-    ['Matière(s)',   mats.join(', ')],
-    ['Date',         selectedMeta.dayFull],
-    ['Créneau',      selectedMeta.timeLabel],
-  ].map(([l,v]) => `<div class="recap-row"><span>${l}</span><span>${v}</span></div>`).join('');
+  try {
+    const reponse = await envoyerInscriptionBackend({
+      nom, classe, email,
+      matieres: mats.join(', '),
+      date: selectedMeta.dayFull,
+      creneau: selectedMeta.timeLabel,
+      semaine: selectedMeta.week
+    });
 
-  showView('view-success');
+    if (!reponse.succes) {
+      alerts.innerHTML = `<div class="alert alert-red">${errIcon} ${reponse.message}</div>`;
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = 'Confirmer mon inscription';
+      return;
+    }
+
+    // Succès — mettre à jour le compteur local et le planning affiché
+    slotData[selectedSlot].used++;
+    localStorage.setItem(lsKey, already + 1);
+
+    document.getElementById('success-email').textContent = email;
+    document.getElementById('success-recap').innerHTML = [
+      ['Nom & Prénom', nom],
+      ['Classe',       classe],
+      ['Matière(s)',   mats.join(', ')],
+      ['Date',         selectedMeta.dayFull],
+      ['Créneau',      selectedMeta.timeLabel],
+    ].map(([l,v]) => `<div class="recap-row"><span>${l}</span><span>${v}</span></div>`).join('');
+
+    renderAllTables();
+    showView('view-success');
+
+  } catch(err) {
+    alerts.innerHTML = `<div class="alert alert-red">${errIcon} Erreur de connexion. Vérifie ta connexion internet et réessaie.</div>`;
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = 'Confirmer mon inscription';
+  }
 });
 
 // ═══════════════════════════════════════════════
@@ -847,8 +865,18 @@ function exportCSV() {
   a.click();
 }
 
-function sendAllReminders() {
-  alert(`${inscriptions.filter(i=>i.statut==='confirmé').length} rappel(s) envoyés via Apps Script une fois le backend connecté.`);
+async function sendAllReminders() {
+  if (!confirm('Envoyer les rappels à tous les inscrits confirmés ?')) return;
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'lancerRappels' })
+    });
+    const json = await res.json();
+    alert(json.message || 'Rappels traités.');
+  } catch(err) {
+    alert('Erreur de connexion au backend.');
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -879,10 +907,101 @@ function downloadQR() {
 }
 
 // ═══════════════════════════════════════════════
+//  BACKEND — APPS SCRIPT
+// ═══════════════════════════════════════════════
+
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAyalKUB8QB_k7j4_CHDm8r-dW4JIcZkS-dBfkViDPjoNj9IrV5O7y_8obcnW4kcj8/exec';
+
+/**
+ * Charge l'état réel du planning depuis Apps Script au démarrage.
+ * Met à jour slotData avec les vraies places utilisées.
+ */
+async function chargerPlanningDepuisBackend() {
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, { method: 'GET' });
+    const json = await res.json();
+    if (!json.succes || !json.planning) return;
+    // Mettre à jour slotData avec les données réelles
+    Object.keys(slotData).forEach(k => {
+      const s = slotData[k];
+      const cle = s.day + '|' + s.label;
+      if (json.planning[cle]) {
+        s.used   = json.planning[cle].used;
+        s.places = json.planning[cle].places;
+      }
+    });
+    renderAllTables();
+  } catch(err) {
+    // Silencieux — le planning local reste affiché en cas d'erreur réseau
+    console.warn('Planning backend non disponible, affichage local utilisé.', err);
+  }
+}
+
+/**
+ * Envoie une inscription vers Apps Script.
+ * Retourne { succes, message, token } ou lève une erreur.
+ */
+async function envoyerInscriptionBackend(payload) {
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'inscrire', ...payload })
+  });
+  return await res.json();
+}
+
+/**
+ * Envoie une annulation vers Apps Script via le token URL.
+ * Appelée automatiquement si l'URL contient ?annuler=TOKEN
+ */
+async function traiterAnnulationURL() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('annuler');
+  if (!token) return;
+
+  // Afficher un écran d'attente
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.body.insertAdjacentHTML('beforeend',
+    '<div id="annulation-overlay" style="position:fixed;inset:0;background:var(--gray-50);display:flex;align-items:center;justify-content:center;z-index:999">' +
+    '<div style="background:white;border-radius:16px;border:1px solid var(--gray-200);padding:40px;text-align:center;max-width:400px;box-shadow:var(--shadow-lg)">' +
+    '<div style="font-size:32px;margin-bottom:16px">⏳</div>' +
+    '<p style="font-size:15px;color:var(--gray-800)">Annulation en cours…</p>' +
+    '</div></div>'
+  );
+
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'annuler', token })
+    });
+    const json = await res.json();
+    document.getElementById('annulation-overlay').remove();
+
+    // Afficher le résultat
+    document.body.insertAdjacentHTML('beforeend',
+      '<div id="annulation-result" style="position:fixed;inset:0;background:var(--gray-50);display:flex;align-items:center;justify-content:center;z-index:999">' +
+      '<div style="background:white;border-radius:16px;border:1px solid var(--gray-200);padding:40px;text-align:center;max-width:420px;box-shadow:var(--shadow-lg)">' +
+      '<div style="font-size:40px;margin-bottom:16px">' + (json.succes ? '✅' : '❌') + '</div>' +
+      '<h3 style="font-family:var(--font-serif);font-size:20px;font-weight:400;margin-bottom:10px">' +
+      (json.succes ? 'Inscription annulée' : 'Annulation impossible') + '</h3>' +
+      '<p style="font-size:13px;color:var(--gray-700);line-height:1.7;margin-bottom:20px">' + json.message + '</p>' +
+      '<a href="' + window.location.pathname + '" style="font-family:var(--font-sans);font-size:13px;font-weight:500;color:white;background:var(--blue);border-radius:6px;padding:9px 18px;text-decoration:none">Retour au planning</a>' +
+      '</div></div>'
+    );
+  } catch(err) {
+    document.getElementById('annulation-overlay').remove();
+    alert('Erreur lors de l\'annulation. Réessaie dans quelques instants.');
+  }
+}
+
+// ═══════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════
 buildMatieres();
 renderAllTables();
+// Charger le vrai planning depuis Apps Script
+chargerPlanningDepuisBackend();
+// Traiter l'annulation si l'URL contient ?annuler=TOKEN
+traiterAnnulationURL();
 </script>
 </body>
 </html>
