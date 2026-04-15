@@ -527,9 +527,6 @@ function initWeek(days, weekKey) {
 }
 
 let slotData = { ...initWeek(DAYS_W1,'W1'), ...initWeek(DAYS_W2,'W2') };
-// Forcer 1 créneau complet pour la démo
-const demoFullKey = Object.keys(slotData)[3];
-slotData[demoFullKey].used = slotData[demoFullKey].places;
 
 let inscriptions = [
   { id:1, nom:'Dupont Alexis', classe:'4P Hôtellerie', matieres:'Pratique cuisine', date:'Lundi 8 juin', creneau:'8h15 – 9h05', email:'alexis.dupont@exemple.com', statut:'confirmé', token:'abc-001' },
@@ -910,7 +907,7 @@ function downloadQR() {
 //  BACKEND — APPS SCRIPT
 // ═══════════════════════════════════════════════
 
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwJ6Wra8vEO72tteo9sV-CrqOJg4u3riMOtTj7-wj8C42G28-T6cs-F1iG7UtvdY44B/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_7J6JqI5tFPzpPV9CF41N49pdNzBcGaC_1W-r_sL4IUaD_KjHce3u4FqTzSjQHO8k/exec';
 
 /**
  * Charge l'état réel du planning depuis Apps Script au démarrage.
