@@ -258,7 +258,7 @@ body{font-family:var(--font-sans);color:var(--gray-900);background:var(--gray-50
       <h2>Inscris-toi à une séance d'accompagnement</h2>
       <p>Sélectionne un créneau dans le planning, complète le formulaire et tu recevras une confirmation par email avec un lien pour annuler si nécessaire.</p>
       <div class="hero-meta">
-        <span class="badge badge-blue">Sessions 8 – 19 juin 2025</span>
+        <span class="badge badge-blue">Sessions 8 – 12 juin 2025</span>
         <span class="badge badge-green">Places disponibles</span>
         <span class="badge badge-orange">Max 3 séances / semaine</span>
       </div>
@@ -272,24 +272,13 @@ body{font-family:var(--font-sans);color:var(--gray-900);background:var(--gray-50
     </div>
 
     <div class="planning-section">
-      <div class="section-title">Semaine 1</div>
       <div class="week-block">
         <div class="week-header">
-          <span class="week-label">Semaine 1</span>
+          <span class="week-label">Semaine</span>
           <span class="week-dates">Lundi 8 – Vendredi 12 juin 2025</span>
         </div>
         <div class="planning-table-wrap">
           <table class="planning-table" id="table-w1"></table>
-        </div>
-      </div>
-      <div class="section-title">Semaine 2</div>
-      <div class="week-block">
-        <div class="week-header">
-          <span class="week-label">Semaine 2</span>
-          <span class="week-dates">Lundi 15 – Vendredi 19 juin 2025</span>
-        </div>
-        <div class="planning-table-wrap">
-          <table class="planning-table" id="table-w2"></table>
         </div>
       </div>
     </div>
@@ -481,13 +470,7 @@ const DAYS_W1 = [
   { label:'Jeu 11/06', full:'Jeudi 11 juin',     hasPM:true  },
   { label:'Ven 12/06', full:'Vendredi 12 juin',  hasPM:true  },
 ];
-const DAYS_W2 = [
-  { label:'Lun 15/06', full:'Lundi 15 juin',     hasPM:true  },
-  { label:'Mar 16/06', full:'Mardi 16 juin',      hasPM:true  },
-  { label:'Mer 17/06', full:'Mercredi 17 juin',  hasPM:false },
-  { label:'Jeu 18/06', full:'Jeudi 18 juin',     hasPM:true  },
-  { label:'Ven 19/06', full:'Vendredi 19 juin',  hasPM:true  },
-];
+const DAYS_W2 = [];
 
 const MATIERES = [
   'Français','Maths','Sciences','Histoire','Géographie','EES','Gestion',
@@ -514,12 +497,12 @@ function initWeek(days, weekKey) {
     SLOTS_AM.forEach(s => {
       if (s.isPause) return;
       const k = makeSlotKey(weekKey, di, s.key);
-      data[k] = { places:config.defaultPlaces, used:Math.floor(Math.random()*4), day:d.full, label:s.label };
+      data[k] = { places:config.defaultPlaces, used:0, day:d.full, label:s.label };
     });
     if (d.hasPM) {
       SLOTS_PM.forEach(s => {
         const k = makeSlotKey(weekKey, di, s.key);
-        data[k] = { places:config.defaultPlaces, used:Math.floor(Math.random()*5), day:d.full, label:s.label };
+        data[k] = { places:config.defaultPlaces, used:0, day:d.full, label:s.label };
       });
     }
   });
@@ -622,7 +605,6 @@ function buildTable(tableId, days, weekKey) {
 
 function renderAllTables() {
   buildTable('table-w1', DAYS_W1, 'W1');
-  buildTable('table-w2', DAYS_W2, 'W2');
 }
 
 // ═══════════════════════════════════════════════
@@ -998,7 +980,4 @@ renderAllTables();
 // Charger le vrai planning depuis Apps Script
 chargerPlanningDepuisBackend();
 // Traiter l'annulation si l'URL contient ?annuler=TOKEN
-traiterAnnulationURL();
-</script>
-</body>
-</html>
+traiterAnn
